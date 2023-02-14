@@ -3,14 +3,14 @@ import random
 #from Passenger.PASSENGER import Passenger
 
 import sys
-sys.path.insert(0, 'C:/VRP/Projet_vrp')
+sys.path.insert(0, 'C:/git_vrp/VRP_SAV')
 
 
 #importing the module 
 import logging 
 
 #now we will Create and configure logger 
-logging.basicConfig(filename="C:/VRP/Projet_vrp/std.log", 
+logging.basicConfig(filename="logfile.log", 
 					format='%(asctime)s %(message)s', 
 					filemode='w') 
 
@@ -21,7 +21,7 @@ logger=logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
 class SharedAutonomousVehicle:
-    def __init__(self, SAV_ID, position, Cmax, CE=None, departuretime=None):
+    def __init__(self, SAV_ID, position, Cmax, warehouse_ID, warehouse_position, CE=None, departuretime=None):
         self.SAV_ID = SAV_ID
         self.CE = CE
         self.Cmax = Cmax
@@ -29,6 +29,8 @@ class SharedAutonomousVehicle:
         self.listofpassengers = []
         self.availableplace = Cmax
         self.postion = position
+        self.warehouse_ID = warehouse_ID
+        self.warehouse_position = warehouse_position
     
     def update_availableplace(self,pickup,delevery):
         if (pickup and not delevery):

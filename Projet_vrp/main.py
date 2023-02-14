@@ -1,29 +1,28 @@
-import sys
-sys.path.insert(0, 'C:/VRP/Projet_vrp')
+import random
+import pandas as pd
 
-#importing the module 
-import logging 
-
-#now we will Create and configure logger 
-logging.basicConfig(filename="std.log", 
-					format='%(asctime)s %(message)s', 
-					filemode='w') 
-
-#Let us Create an object 
-logger=logging.getLogger() 
-
-#Now we are going to Set the threshold of logger to DEBUG 
-logger.setLevel(logging.DEBUG) 
-
+"""import sys
+sys.path.insert(0, 'C:/git_vrp/VRP_SAV')"""
+ 
 
 from Autonomous_vehicle.SAV import SharedAutonomousVehicle
 from Passenger.PASSENGER import Passenger
-import logging
+from Write_logfile import WriteLogMessage
 
-def createpassengerdemand(numberofdemand):
+def createpassengerdemand(numberofdemand, passengerlist):
     #list of passenger
+    listofpassenger = []
+    while len(listofpassenger) < numberofdemand + 1:
+        passengertrip = random.choice(passengerlist.index)
+        if passengertrip not in listofpassenger:
+            listofpassenger.append(passengertrip)
     listofpassengerdemand = [] 
-    ag_id = 0
+    for i in listofpassenger:
+        ag = Passenger(passenger_ID=passengerlist["person_id"][i], passenger_pickupposition=(passengerlist["origin_x"][i],passengerlist["origin_y"][i]), passenger_destinationposition=(passengerlist["destination_x"][i],passengerlist["destination_y"][i]), waitingtime=3)
+        WriteLogMessage.passenger_request(ag)
+        listofpassengerdemand.append(ag)
+    return listofpassengerdemand
+    """ag_id = 0
     while len(listofpassengerdemand) < numberofdemand:
         ag_id = ag_id+1
         ag_pickuppostion = (ag_id, ag_id+1)
@@ -31,7 +30,7 @@ def createpassengerdemand(numberofdemand):
         ag_waitingtime = 3
         ag = Passenger(passenger_ID=ag_id, passenger_pickupposition=ag_pickuppostion, passenger_destinationposition=ag_destinationpostion, waitingtime=ag_waitingtime)
         listofpassengerdemand.append(ag)
-    return listofpassengerdemand
+    return listofpassengerdemand"""
 
 def createSAVpopulation(numberofvehicle):
     listofSAV = []
@@ -46,9 +45,10 @@ def createSAVpopulation(numberofvehicle):
     return listofSAV
 
 def main():
-    logging.info('############# starting the programme #####################')
+    WriteLogMessage.starting_program(numberofsav=5)
+    passengerlist = pd.read_excel("C:/GIT_VRP/VRP_SAV/cleaneddb.xlsx")
     listofsav = createSAVpopulation(5)
-    listofpassengerdemand = createpassengerdemand(4)
+    listofpassengerdemand = createpassengerdemand(4,passengerlist)
     listofpassengerdemand[0].new_passengerrequest()
     listofavailableSAV = []
     for sav in listofsav:

@@ -7,7 +7,7 @@ sys.path.insert(0, 'C:/VRP/Projet_vrp')
 
 
 #now we will Create and configure logger 
-logging.basicConfig(filename="C:/VRP/Projet_vrp/logfile.log", 
+logging.basicConfig(filename="C:/GIT_VRP/VRP_SAV/Projet_vrp/logfile.log", 
 					format='%(asctime)s %(message)s', 
 					filemode='w',
                     level=logging.INFO) 
@@ -19,12 +19,24 @@ logger=logging.getLogger()
 logger.setLevel(logging.DEBUG) 
 
 class WriteLogMessage():
-    def starting_program():
-        pass
+    @staticmethod
+    def starting_program(numberofsav):
+        logging.info('############# starting the programme #####################')
+        logging.info("In this context we have deployed {} SAVs".format(numberofsav))
+        logging.info("This is the departure of the program, all the SAV vehicules are at thier associated warehouse")
+    
+    @staticmethod
+    def reportWareHouse(warehouse):
+        logging.info('##################### This part is for repporting the Warehouses availables #####################')
+        logging.info("WareHouse ID {} at the position {}".format(warehouse.warehouse_ID, warehouse.warehouse_position))
+        
 
-    def passenger_request():
-        pass
+    @staticmethod
+    def passenger_request(ag):
+        logging.info("ag id = {}".format(ag.passenger_ID))
 
+
+    @staticmethod
     def SAV_propositions():
         pass
 

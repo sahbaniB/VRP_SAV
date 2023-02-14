@@ -2,14 +2,14 @@ import logging
 from time import sleep
 #from Autonomous_vehicle.SAV import SharedAutonomousVehicle
 import sys
-sys.path.insert(0, 'C:/VRP/Projet_vrp')
+sys.path.insert(0, 'C:/git_vrp/VRP_SAV')
 
 
 #importing the module 
 import logging 
 
 #now we will Create and configure logger 
-logging.basicConfig(filename="C:/VRP/Projet_vrp/std.log", 
+logging.basicConfig(filename="logfile.log", 
 					format='%(asctime)s %(message)s', 
 					filemode='w') 
 
@@ -67,10 +67,10 @@ class Passenger:
         for sav in listofSAV:
             """ 
             listofsav: is a list of dictionary 
-            sav[0]: is the vehicle that provide the price 
+            sav[0]: is the vehicle that provide the price (an instance of sav)
             sav[1]: is the price of traveled trip
             """
-            logging.info("sav price {}".format(sav[1]))
+            logging.info("sav ID {}, sav price {}".format(sav[0].SAV_ID,sav[1]))
             if list(sav)[1] < bestprice:
                 bestprice = list(sav)[1]
                 bestSAV = list(sav)[0]
@@ -78,7 +78,7 @@ class Passenger:
             #The passenger select the SAV with the most place available
             if list(sav)[1] == bestprice:
                 if list(sav)[0].availableplace > bestSAV.availableplace:
-                      bestSAV = list(sav)[1]
+                      bestSAV = list(sav)[0]
         self.attributedSAV = bestSAV
         self.waitingtime = 0
         logging.info("The passenger {} has selected the SAV {}".format(self.passenger_ID, self.attributedSAV.SAV_ID))

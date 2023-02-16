@@ -1,9 +1,23 @@
+import logging
 import random
 import pandas as pd
 import json
 import threading
 import sys
 sys.path.insert(0, 'C:/git_vrp/VRP_SAV')
+
+#now we will Create and configure logger 
+logging.basicConfig(filename="C:/GIT_VRP/VRP_SAV/Projet_vrp/logfile.log", 
+					format='%(asctime)s %(message)s', 
+					filemode='w',
+                    level=logging.INFO) 
+
+#Let us Create an object 
+logger=logging.getLogger() 
+
+#Now we are going to Set the threshold of logger to DEBUG 
+logger.setLevel(logging.DEBUG) 
+
 
 
 from Autonomous_vehicle.SAV import SharedAutonomousVehicle
@@ -14,27 +28,37 @@ from Autonomous_vehicle.Warehouses import WareHouse
 #class Controller(threading.Thread):
 class Controller():
     
-    def __init__(self, listofWareHouse=[], listofSAV=[], listofpassengerdemand=[]):
+    def __init__(self, listofWareHouse=[], listofavailableSAV=[], listofpassengerdemand=[]):
         threading.Thread.__init__(self)
         self.listeofWareHouse = listofWareHouse
-        self.listofSAV = listofSAV
+        self.listofavailableSAV = listofavailableSAV
         self.listofpassengerdemand = listofpassengerdemand
     
     #Create The warehouses
     def createWarehouses(self):
         #Read the coordination of warehouse from file WareHouses.xlsx
         WareHouses = pd.read_excel("C:/GIT_VRP/VRP_SAV/WareHouse.xlsx",index_col=0)
+        logging.info("Read file secceded warehouse len {}".format(len(WareHouses)))
         for k in WareHouses.index:
+            listofSAV = []
+            logging.info("warehouse index {}".format(k))
             warehouse = WareHouse(warehouse_ID=WareHouses['warehouse_id'][k], warehouse_position=(WareHouses['position_x'][k],WareHouses['position_y'][k]), \
                 numberofSAV=WareHouses['number of SAV'][k], listofSAV=json.loads(WareHouses['attributed SAV'][k]))
-            warehouse.update_warehouse(self.createSAVs(listofSAV=warehouse.listofSAV, warehouse=warehouse))
+            logging.info("warehouse id {}".format(warehouse.warehouse_ID)) 
+            listofSAV = self.createSAVs(listofSAV=warehouse.listofSAV, warehouse=warehouse)
+            logging.info("warehouse list of SAV {}".format(len(listofSAV))) 
+            warehouse.update_warehouse(listofSAV=listofSAV)
+            logging.info("warehouse was updated {}".format(warehouse.warehouse_ID)) 
             #Update the list of warehouse for the controller 
             self.listeofWareHouse.append(warehouse)
-        WriteLogMessage.reportWareHouse(warehouses=self.listeofWareHouse)
+        logging.info("len listofwarehouse {}".format(len(self.listeofWareHouse)))
+        WriteLogMessage.reportWareHouse(self.listeofWareHouse)
 
     #Create the SAVs for each warehouse
     #The creation of the SAV is directly related to the creation of warehouses
     def createSAVs(self, listofSAV, warehouse):
+        logging.info("numbre of sav {}".format(len(listofSAV)))
+        createdwarehouseSAV = [] 
         for id in listofSAV:
             sav_id = id
             warehouseid = warehouse.warehouse_ID
@@ -44,9 +68,10 @@ class Controller():
             #Please you need to chage the capacity of SAV 
             Cmax = 3
             sav = SharedAutonomousVehicle(SAV_ID=sav_id, position=position, Cmax=Cmax,warehouse_ID= warehouseid,warehouse_position=position)
-            listofSAV.append(sav)
-            self.listofSAV.append(sav)
-        return listofSAV
+            logging.info("sav was created succefully {}".format(sav.SAV_ID))
+            createdwarehouseSAV.append(sav)
+            self.listofavailableSAV.append(sav)
+        return createdwarehouseSAV
 
     #Create the profile for demands
     def createpassengerdemand(self,numberofdemand):
@@ -74,7 +99,12 @@ class Controller():
         #Create the demande of passenger 
         self.createpassengerdemand(17)
 
-controller1 = Controller()
-controller1.run()
+def main():
+    controller1 = Controller()
+    controller1.run()
+
+if __name__ == "__main__":
+    main()
+
 
 

@@ -38,20 +38,14 @@ class Controller():
     def createWarehouses(self):
         #Read the coordination of warehouse from file WareHouses.xlsx
         WareHouses = pd.read_excel("C:/GIT_VRP/VRP_SAV/WareHouse.xlsx",index_col=0)
-        logging.info("Read file secceded warehouse len {}".format(len(WareHouses)))
         for k in WareHouses.index:
             listofSAV = []
-            logging.info("warehouse index {}".format(k))
             warehouse = WareHouse(warehouse_ID=WareHouses['warehouse_id'][k], warehouse_position=(WareHouses['position_x'][k],WareHouses['position_y'][k]), \
                 numberofSAV=WareHouses['number of SAV'][k], listofSAV=json.loads(WareHouses['attributed SAV'][k]))
-            logging.info("warehouse id {}".format(warehouse.warehouse_ID)) 
-            listofSAV = self.createSAVs(listofSAV=warehouse.listofSAV, warehouse=warehouse)
-            logging.info("warehouse list of SAV {}".format(len(listofSAV))) 
+            listofSAV = self.createSAVs(listofSAV=warehouse.listofSAV, warehouse=warehouse) 
             warehouse.update_warehouse(listofSAV=listofSAV)
-            logging.info("warehouse was updated {}".format(warehouse.warehouse_ID)) 
             #Update the list of warehouse for the controller 
             self.listeofWareHouse.append(warehouse)
-        logging.info("len listofwarehouse {}".format(len(self.listeofWareHouse)))
         WriteLogMessage.reportWareHouse(self.listeofWareHouse)
 
     #Create the SAVs for each warehouse
@@ -68,7 +62,6 @@ class Controller():
             #Please you need to chage the capacity of SAV 
             Cmax = 3
             sav = SharedAutonomousVehicle(SAV_ID=sav_id, position=position, Cmax=Cmax,warehouse_ID= warehouseid,warehouse_position=position)
-            logging.info("sav was created succefully {}".format(sav.SAV_ID))
             createdwarehouseSAV.append(sav)
             self.listofavailableSAV.append(sav)
         return createdwarehouseSAV

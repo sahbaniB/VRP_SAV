@@ -26,9 +26,11 @@ class WriteLogMessage():
         logging.info("This is the departure of the program, all the SAV vehicules are at thier associated warehouse")
     
     @staticmethod
-    def reportWareHouse(warehouse):
+    def reportWareHouse(warehouses):
         logging.info('##################### This part is for repporting the Warehouses availables #####################')
-        logging.info("WareHouse ID {} at the position {}".format(warehouse.warehouse_ID, warehouse.warehouse_position))
+        for warehouse in warehouses:
+            logging.info("len of ware house is")
+            logging.info("WareHouse ID {} at the position {}".format(warehouse.warehouse_ID , warehouse.warehouse_position))
         
 
     @staticmethod

@@ -4,6 +4,7 @@ import pandas as pd
 import json
 import threading
 import sys
+ 
 sys.path.insert(0, 'C:/git_vrp/VRP_SAV')
 
 #now we will Create and configure logger 
@@ -25,8 +26,8 @@ from Passenger.PASSENGER import Passenger
 from Write_logfile import WriteLogMessage
 from Autonomous_vehicle.Warehouses import WareHouse
 
-#class Controller(threading.Thread):
-class Controller():
+class Controller(threading.Thread):
+#class Controller():
     
     def __init__(self, listofWareHouse=[], listofavailableSAV=[], listofpassengerdemand=[]):
         threading.Thread.__init__(self)
@@ -84,6 +85,8 @@ class Controller():
             listofpassengerdemand.append(ag)
             self.listofpassengerdemand.append(ag) 
         return listofpassengerdemand
+
+    def createcluster(listofpassengerdemand) 
 
     def run(self):
         WriteLogMessage.starting_program(numberofsav=5)

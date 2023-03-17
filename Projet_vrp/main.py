@@ -18,8 +18,13 @@ def createpassengerdemand(numberofdemand, passengerlist):
             listofpassenger.append(passengertrip)
     listofpassengerdemand = [] 
     for i in listofpassenger:
-        ag = Passenger(passenger_ID=passengerlist["person_id"][i], passenger_pickupposition=(passengerlist["origin_x"][i],passengerlist["origin_y"][i]), passenger_destinationposition=(passengerlist["destination_x"][i],passengerlist["destination_y"][i]), waitingtime=3)
-        WriteLogMessage.passenger_request(ag)
+        ag = Passenger(passenger_ID=passengerlist["person_id"][i])
+        """ag = Passenger(passenger_ID=passengerlist["person_id"][i], \
+            x_passenger_pickupposition=passengerlist["origin_x"][i],\
+            y_passenger_pickupposition=passengerlist["origin_y"][i],\
+                    x_passenger_destinationposition=passengerlist["destination_x"][i],\
+                        y_passenger_destinationposition=passengerlist["destination_y"][i], waitingtime=3)"""
+        #WriteLogMessage.passenger_request(ag)
         listofpassengerdemand.append(ag)
     return listofpassengerdemand
     """ag_id = 0
@@ -39,21 +44,22 @@ def createSAVpopulation(numberofvehicle):
     while len(listofSAV) < numberofvehicle:
         sav_id = sav_id + 1
         position = [sav_id, sav_id+1]
-        Cmax = 3
-        sav = SharedAutonomousVehicle(SAV_ID=sav_id, position=[], Cmax=Cmax)
+        CMAX = 3
+        sav = SharedAutonomousVehicle(SAV_ID=sav_id, x_position=[], y_position=[], CMAX=CMAX)
         listofSAV.append(sav)
     return listofSAV
 
-def main():
+def main(): 
     WriteLogMessage.starting_program(numberofsav=5)
     passengerlist = pd.read_excel("C:/GIT_VRP/VRP_SAV/cleaneddb.xlsx")
     listofsav = createSAVpopulation(5)
     listofpassengerdemand = createpassengerdemand(4,passengerlist)
-    listofpassengerdemand[0].new_passengerrequest()
-    listofavailableSAV = []
+    for psg in listofpassengerdemand:
+        psg.create_passenger_request(listofsav)
+    """listofavailableSAV = []
     for sav in listofsav:
         listofavailableSAV.append((sav, sav.calculateprice()))
-    listofpassengerdemand[0].passenger_request(listofavailableSAV)
+    listofpassengerdemand[0].create_passenger_request(listofavailableSAV)"""
 
 
 if __name__ == "__main__":

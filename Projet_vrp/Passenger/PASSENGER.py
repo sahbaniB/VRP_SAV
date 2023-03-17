@@ -1,5 +1,7 @@
 import logging
+import threading
 from time import sleep
+import pandas as pd
 #from Autonomous_vehicle.SAV import SharedAutonomousVehicle
 import sys
 sys.path.insert(0, 'C:/git_vrp/VRP_SAV')
@@ -19,13 +21,17 @@ logger=logging.getLogger()
 #Now we are going to Set the threshold of logger to DEBUG 
 logger.setLevel(logging.DEBUG) 
 
+from Write_logfile import WriteLogMessage
 
-
-class Passenger:
-    def __init__(self, passenger_ID, passenger_pickupposition, passenger_destinationposition, waitingtime):
+class Passenger(threading.Thread):
+    def __init__(self, passenger_ID, x_passenger_pickupposition=[], y_passenger_pickupposition=[], x_passenger_destinationposition=[], \
+        y_passenger_destinationposition=[], waitingtime=3):
+        threading.Thread.__init__(self)
         self.passenger_ID = passenger_ID
-        self.passenger_pickupposition = passenger_pickupposition
-        self.passenger_destinaationposition = passenger_destinationposition
+        self.x_passenger_pickupposition = x_passenger_pickupposition
+        self.y_passenger_pickupposition = y_passenger_pickupposition
+        self.x_passenger_destinationposition = x_passenger_destinationposition
+        self.y_passenger_destinationposition = y_passenger_destinationposition
         self.state_pickedup = False
         self.state_delevered = False
         self.waitingtime = waitingtime
@@ -35,13 +41,14 @@ class Passenger:
         self.state_pickedup = pickup
         self.state_delevered = delevery
     
-    ### Fist part pickup
-    def new_passengerrequest(self):
+    ### This part is dedicated for the the creation of the passenger request 
+    def create_passenger_request(self, listofavailableSAV):
+        #Ensure that passenger is in good condition (has the right state)
         self.update_state(pickup= False, delevery= False)
-        logging.info("The passenger {} is ready to lunch request".format(self.passenger_ID, self.waitingtime))
-
-    def passenger_request(self, listofSAV):
-        while self.waitingtime:
+        WriteLogMessage.passenger_request_message(passenger=self)
+        self.passenger_listner(listofavailableSAV=listofavailableSAV)
+        
+        """while self.waitingtime:
             if (not self.state_pickedup and not self.state_delevered):
                 logging.info("The passenger {} has pickedup request with a waiting time {}".format(self.passenger_ID, self.waitingtime))
                 if len(listofSAV):
@@ -55,33 +62,37 @@ class Passenger:
         if self.state_delevered:
             logging.info("The passenger {} successfully reached his destination".format(self.passenger_ID))
         elif not self.state_pickedup and not self.state_delevered:
-            logging.info("The passenger {} was not affected to any available SAV")
+            logging.info("The passenger {} was not affected to any available SAV")"""
 
-    def createrequest(self):
-        self.update_state(pickup = True, delevery = True)
-        self.passenger_request
+    def passenger_listner(self, listofavailableSAV):
+        pricelistSAV = []
+        sleep(self.waitingtime)
+        for sav in listofavailableSAV:
+            pricelistSAV.append([sav,sav.calculateprice()])
+        self.selectSAV(pricelistSAV=pricelistSAV)
 
-    def selectSAV(self, listofSAV):
+    
+    def selectSAV(self, pricelistSAV):
         bestSAV = None
         bestprice = 10
-        for sav in listofSAV:
-            """ 
-            listofsav: is a list of dictionary 
-            sav[0]: is the vehicle that provide the price (an instance of sav)
-            sav[1]: is the price of traveled trip
-            """
-            logging.info("sav ID {}, sav price {}".format(sav[0].SAV_ID,sav[1]))
-            if list(sav)[1] < bestprice:
-                bestprice = list(sav)[1]
-                bestSAV = list(sav)[0]
+        for priceSAV in pricelistSAV:
 
-            #The passenger select the SAV with the most place available
-            if list(sav)[1] == bestprice:
-                if list(sav)[0].availableplace > bestSAV.availableplace:
-                      bestSAV = list(sav)[0]
+            #priceSAV: is a list of dictionary 
+            #sav[0]: is the vehicle that provide the price (an instance of sav)
+            #sav[1]: is the price of traveled trip
+            
+            if priceSAV[1] < bestprice:
+                bestSAV = priceSAV[0]
+                bestprice = priceSAV[1]
+            #In case that various SAVs provide the same price
+            #The passenger select the SAV with the most place available 
+            if priceSAV[1] == bestprice:
+                if priceSAV[0].availableplace > bestSAV.availableplace:
+                      bestSAV = priceSAV[0]
         self.attributedSAV = bestSAV
         self.waitingtime = 0
-        logging.info("The passenger {} has selected the SAV {}".format(self.passenger_ID, self.attributedSAV.SAV_ID))
+        WriteLogMessage.passenger_selection_of_SAV(passenger=self,bestSAV=bestSAV,bestprice=bestprice)
+        # logging.info("The passenger {} has selected the SAV {}".format(self.passenger_ID, self.attributedSAV.SAV_ID))
         self.update_state(pickup= not self.state_pickedup, delevery= self.state_delevered) 
         self.attributedSAV.update_listofpassengers(self, pickup=self.state_pickedup, delevery=self.state_delevered)
         
@@ -91,3 +102,6 @@ class Passenger:
         self.state_delevered = True
         self.attributedSAV.update_listofpassengers(passenger=self, pickup=self.state_pickedup, delevery=self.state_delevered)
         logging.info("The passenger {} has successfully reached his destination".format(self.passenger_ID))
+
+    def run(self,listofavailableSAV):
+        self.create_passenger_request(listofavailableSAV)

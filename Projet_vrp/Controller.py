@@ -61,8 +61,8 @@ class Controller(threading.Thread):
             #For the moment Cmax is a constant 
             #Need to chage the Cmax to an input defined at the beginning of the program
             #Please you need to chage the capacity of SAV 
-            Cmax = 3
-            sav = SharedAutonomousVehicle(SAV_ID=sav_id, position=position, Cmax=Cmax,warehouse_ID= warehouseid,warehouse_position=position)
+            CMAX = 3
+            sav = SharedAutonomousVehicle(SAV_ID=sav_id, position=position, CMAX=CMAX,warehouse_ID= warehouseid,warehouse_position=position)
             createdwarehouseSAV.append(sav)
             self.listofavailableSAV.append(sav)
         return createdwarehouseSAV
@@ -86,7 +86,8 @@ class Controller(threading.Thread):
             self.listofpassengerdemand.append(ag) 
         return listofpassengerdemand
 
-    def createcluster(listofpassengerdemand) 
+    def createcluster(listofpassengerdemand):
+        pass
 
     def run(self):
         WriteLogMessage.starting_program(numberofsav=5)
